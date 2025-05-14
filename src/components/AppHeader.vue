@@ -9,11 +9,7 @@
       </template>
     </template>
     <template #end>
-      <span
-        class="flex align-item-center menu-exit"
-        v-if="userStore.userId"
-        @click="userStore.userId = ''"
-      >
+      <span class="flex align-item-center menu-exit" v-if="userStore.userId" @click="signOutMethod">
         <span class="pi pi-sign-out p-p-menuitem-icon"></span>
         <span class="ml-2">Выход</span>
       </span>
@@ -26,6 +22,8 @@ import { useUserStore } from '@/stores/user'
 import { Menubar } from 'primevue'
 import type { ComputedRef } from 'vue'
 import { computed, ref } from 'vue'
+import { getAuth, signOut } from 'firebase/auth'
+import { useRouter } from 'vue-router'
 
 interface IMenuItem {
   label: string
@@ -34,6 +32,7 @@ interface IMenuItem {
   show: ComputedRef<boolean>
 }
 
+const router = useRouter()
 const userStore = useUserStore()
 
 const items = ref<IMenuItem[]>([
@@ -62,6 +61,11 @@ const items = ref<IMenuItem[]>([
     show: computed(() => !!userStore.userId),
   },
 ])
+
+const signOutMethod = async (): Promise<void> => {
+  await signOut(getAuth())
+  router.push('/auth')
+}
 </script>
 
 <style scoped>

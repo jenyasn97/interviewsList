@@ -7,11 +7,13 @@ import PrimeVue from 'primevue/config'
 import { definePreset } from '@primeuix/themes'
 import 'primeicons/primeicons.css'
 import 'primeflex/primeflex.css'
-
 import Aura from '@primeuix/themes/aura'
 
-import App from './App.vue'
-import router from './router'
+import { initializeApp } from 'firebase/app'
+import firebaseConfig from '@/config/firebaseConfig.ts'
+import App from '@/App.vue'
+import router from '@/router'
+import ToastService from 'primevue/toastservice'
 
 const MyPreset = definePreset(Aura, {
   semantic: {
@@ -31,6 +33,7 @@ const MyPreset = definePreset(Aura, {
   },
 })
 
+initializeApp(firebaseConfig)
 const app = createApp(App)
 app.use(PrimeVue, {
   theme: {
@@ -42,5 +45,6 @@ app.use(PrimeVue, {
 })
 app.use(createPinia())
 app.use(router)
+app.use(ToastService)
 
 app.mount('#app')
