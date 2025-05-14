@@ -3,6 +3,6 @@ import { Button } from 'primevue'
 </script>
 
 <template>
-  Some content
+  Home
   <Button type="button" label="Search" icon="pi pi-search" />
 </template>
