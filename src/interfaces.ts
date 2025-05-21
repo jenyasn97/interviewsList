@@ -1,4 +1,4 @@
-export interface IInterviw {
+export interface IInterview {
   id: string
   company: string
   vacancyLink: string

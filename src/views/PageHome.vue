@@ -31,11 +31,12 @@
 <script setup lang="ts">
 import { Button, Card, InputText } from 'primevue'
 import { computed, ref } from 'vue'
-import type { IInterviw } from '@/interfaces'
+import type { IInterview } from '@/interfaces'
 import { v4 as uuidv4 } from 'uuid'
-import { getAuth } from 'firebase/auth'
+
 import { getFirestore, setDoc, doc } from 'firebase/firestore'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 
 const company = ref<string>('')
 const vacancyLink = ref<string>('')
@@ -46,13 +47,14 @@ const contactPhone = ref<string>('')
 const loading = ref<boolean>(false)
 const db = getFirestore()
 const router = useRouter()
+const userStore = useUserStore()
 
 const disabledSaveButton = computed(() => {
   return !(company.value && vacancyLink.value && hrName.value)
 })
 async function addNewInterview(): Promise<void> {
   loading.value = true
-  const payload: IInterviw = {
+  const payload: IInterview = {
     id: uuidv4(),
     company: company.value,
     vacancyLink: vacancyLink.value,
@@ -63,9 +65,8 @@ async function addNewInterview(): Promise<void> {
     createdAt: new Date(),
   }
 
-  const userId = getAuth().currentUser?.uid
-  if (userId) {
-    await setDoc(doc(db, `users/${userId}/interviews`, payload.id), payload)
+  if (userStore.userId) {
+    await setDoc(doc(db, `users/${userStore.userId}/interviews`, payload.id), payload)
     router.push('/list')
   }
   loading.value = false
