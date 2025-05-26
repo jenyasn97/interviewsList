@@ -13,9 +13,48 @@
     <Column field="hrName" header="Имя HR" />
     <Column field="vacancyLink" header="Вакансия">
       <template #body="slotProps">
-        <a :href="slotProps.data.vacancyLink" target="_blank">{{ slotProps.data.vacancyLink }}</a>
+        <a :href="slotProps.data.vacancyLink" target="_blank">Ссылка на вакансию</a>
       </template>
     </Column>
+    <Column header="Пройденные этапы">
+      <template #body="slotProps">
+        <div class="flex gap-2">
+          <span v-if="!slotProps.data.stage || slotProps.data.stage.length === 0"
+            >Нет пройденных этапов</span
+          >
+          <div v-else class="interview-stages">
+            <Badge
+              v-for="(stage, idx) in slotProps.data.stage"
+              :key="idx"
+              :value="idx + 1"
+              rounded
+              v-tooltip.top="stage.name"
+            />
+          </div>
+        </div> </template
+    ></Column>
+    <Column header="Зарплатная вилка">
+      <template #body="slotProps">
+        <div class="flex gap-2">
+          <span v-if="!slotProps.data.salaryFrom">Не заполнено</span>
+
+          <span v-if="slotProps.data.salaryTo"
+            >{{ slotProps.data.salaryFrom }} - {{ slotProps.data.salaryTo }}</span
+          >
+        </div>
+      </template></Column
+    >
+
+    <Column header="Результат">
+      <template #body="slotProps">
+        <span v-if="!slotProps.data.result">Не заполнено</span>
+        <template v-else>
+          <Badge
+            :severity="slotProps.data.result === `Offer` ? 'success' : 'danger'"
+            :value="slotProps.data.result === `Offer` ? 'Оффер' : 'Отказ'"
+          />
+        </template> </template
+    ></Column>
     <Column header="Контакты">
       <template #body="slotProps">
         <div class="contacts">
@@ -69,6 +108,7 @@ import {
   useConfirm,
   ProgressSpinner,
   Message,
+  Badge,
 } from 'primevue'
 import { ref, onMounted } from 'vue'
 import {
@@ -148,8 +188,8 @@ onMounted(async () => {
 .messageSize {
   width: 30%;
 }
-/* .interview-stages {
+.interview-stages {
   display: flex;
   gap: 5px;
-} */
+}
 </style>

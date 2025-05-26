@@ -14,6 +14,8 @@ import firebaseConfig from '@/config/firebaseConfig.ts'
 import App from '@/App.vue'
 import router from '@/router'
 import ToastService from 'primevue/toastservice'
+import Tooltip from 'primevue/tooltip'
+
 import ConfirmationService from 'primevue/confirmationservice'
 
 const MyPreset = definePreset(Aura, {
@@ -45,6 +47,7 @@ app.use(PrimeVue, {
   },
 })
 app.use(createPinia())
+app.directive('tooltip', Tooltip)
 app.use(router)
 app.use(ToastService)
 app.use(ConfirmationService)
