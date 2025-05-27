@@ -1,5 +1,4 @@
 <template>
-  <h1>Список собеседований</h1>
   <ProgressSpinner v-if="isLoading" />
   <Message
     v-else-if="!isLoading && !interviews.length"
@@ -8,94 +7,131 @@
     class="messageSize"
     >Нет добавленных собеседование</Message
   >
-  <DataTable v-else :value="interviews">
-    <Column field="company" header="Компания" />
-    <Column field="hrName" header="Имя HR" />
-    <Column field="vacancyLink" header="Вакансия">
-      <template #body="slotProps">
-        <a :href="slotProps.data.vacancyLink" target="_blank">Ссылка на вакансию</a>
-      </template>
-    </Column>
-    <Column header="Пройденные этапы">
-      <template #body="slotProps">
-        <div class="flex gap-2">
-          <span v-if="!slotProps.data.stage || slotProps.data.stage.length === 0"
-            >Нет пройденных этапов</span
-          >
-          <div v-else class="interview-stages">
-            <Badge
-              v-for="(stage, idx) in slotProps.data.stage"
-              :key="idx"
-              :value="idx + 1"
-              rounded
-              v-tooltip.top="stage.name"
-            />
+
+  <div v-else>
+    <h1>Списко собеседований</h1>
+    <div class="flex align-items-center mb-5">
+      <div class="flex align-items-center mr-2">
+        <RadioButton
+          inputId="interviewResult2"
+          name="result"
+          value="Offer"
+          v-model="selectedFilterResult"
+        />
+        <label for="interviewResult2" class="ml-2">Оффер</label>
+      </div>
+      <div class="flex align-items-center mr-2">
+        <RadioButton
+          inputId="interviewResult1"
+          name="result"
+          value="Refusal"
+          v-model="selectedFilterResult"
+        />
+        <label for="interviewResult1" class="ml-2">Отказ</label>
+      </div>
+      <Button
+        class="mr-2"
+        label="Применить"
+        @click="submitFilter"
+        :disabled="!selectedFilterResult"
+      />
+      <Button
+        label="Сбросить"
+        severity="danger"
+        @click="clearFiler"
+        :disabled="!selectedFilterResult"
+      />
+    </div>
+
+    <DataTable :value="interviews">
+      <Column field="company" header="Компания" />
+      <Column field="hrName" header="Имя HR" />
+      <Column field="vacancyLink" header="Вакансия">
+        <template #body="slotProps">
+          <a :href="slotProps.data.vacancyLink" target="_blank">Ссылка на вакансию</a>
+        </template>
+      </Column>
+      <Column header="Пройденные этапы">
+        <template #body="slotProps">
+          <div class="flex gap-2">
+            <span v-if="!slotProps.data.stage || slotProps.data.stage.length === 0"
+              >Нет пройденных этапов</span
+            >
+            <div v-else class="interview-stages">
+              <Badge
+                v-for="(stage, idx) in slotProps.data.stage"
+                :key="idx"
+                :value="idx + 1"
+                rounded
+                v-tooltip.top="stage.name"
+              />
+            </div>
+          </div> </template
+      ></Column>
+      <Column header="Зарплатная вилка">
+        <template #body="slotProps">
+          <div class="flex gap-2">
+            <span v-if="!slotProps.data.salaryFrom">Не заполнено</span>
+
+            <span v-if="slotProps.data.salaryTo"
+              >{{ slotProps.data.salaryFrom }} - {{ slotProps.data.salaryTo }}</span
+            >
           </div>
-        </div> </template
-    ></Column>
-    <Column header="Зарплатная вилка">
-      <template #body="slotProps">
-        <div class="flex gap-2">
-          <span v-if="!slotProps.data.salaryFrom">Не заполнено</span>
+        </template></Column
+      >
 
-          <span v-if="slotProps.data.salaryTo"
-            >{{ slotProps.data.salaryFrom }} - {{ slotProps.data.salaryTo }}</span
-          >
-        </div>
-      </template></Column
-    >
+      <Column header="Результат">
+        <template #body="slotProps">
+          <span v-if="!slotProps.data.result">Не заполнено</span>
+          <template v-else>
+            <Badge
+              :severity="slotProps.data.result === `Offer` ? 'success' : 'danger'"
+              :value="slotProps.data.result === `Offer` ? 'Оффер' : 'Отказ'"
+            />
+          </template> </template
+      ></Column>
+      <Column header="Контакты">
+        <template #body="slotProps">
+          <div class="contacts">
+            <a
+              v-if="slotProps.data.contactTelegram"
+              :href="`https://t.me/ ${slotProps.data.contactTelegram}`"
+              target="_blank"
+              class="contacts__telegram"
+            >
+              <span class="contacts__icon pi pi-telegram"></span> </a
+            ><a
+              v-if="slotProps.data.contactWhatsApp"
+              :href="`https://we.me/ ${slotProps.data.contactWhatsApp}`"
+              target="_blank"
+              class="contacts__whatsapp"
+            >
+              <span class="contacts__icon pi pi-whatsapp"></span> </a
+            ><a
+              v-if="slotProps.data.contactPhone"
+              :href="`tel: ${slotProps.data.contactPhone}`"
+              target="_blank"
+              class="contacts__phone"
+            >
+              <span class="contacts__icon pi pi-phone"></span>
+            </a></div></template
+      ></Column>
+      <Column>
+        <template #body="slotProps">
+          <div class="flex gap-2">
+            <RouterLink :to="`/interview/${slotProps.data.id}`">
+              <Button icon="pi pi-pencil" severity="info" />
+            </RouterLink>
 
-    <Column header="Результат">
-      <template #body="slotProps">
-        <span v-if="!slotProps.data.result">Не заполнено</span>
-        <template v-else>
-          <Badge
-            :severity="slotProps.data.result === `Offer` ? 'success' : 'danger'"
-            :value="slotProps.data.result === `Offer` ? 'Оффер' : 'Отказ'"
-          />
-        </template> </template
-    ></Column>
-    <Column header="Контакты">
-      <template #body="slotProps">
-        <div class="contacts">
-          <a
-            v-if="slotProps.data.contactTelegram"
-            :href="`https://t.me/ ${slotProps.data.contactTelegram}`"
-            target="_blank"
-            class="contacts__telegram"
-          >
-            <span class="contacts__icon pi pi-telegram"></span> </a
-          ><a
-            v-if="slotProps.data.contactWhatsApp"
-            :href="`https://we.me/ ${slotProps.data.contactWhatsApp}`"
-            target="_blank"
-            class="contacts__whatsapp"
-          >
-            <span class="contacts__icon pi pi-whatsapp"></span> </a
-          ><a
-            v-if="slotProps.data.contactPhone"
-            :href="`tel: ${slotProps.data.contactPhone}`"
-            target="_blank"
-            class="contacts__phone"
-          >
-            <span class="contacts__icon pi pi-phone"></span>
-          </a></div></template
-    ></Column>
-    <Column>
-      <template #body="slotProps">
-        <div class="flex gap-2">
-          <RouterLink :to="`/interview/${slotProps.data.id}`">
-            <Button icon="pi pi-pencil" severity="info" />
-          </RouterLink>
-
-          <Button
-            icon="pi pi-trash"
-            severity="danger"
-            @click="confirmRRemoveinterview(slotProps.data.id)"
-          />
-        </div> </template
-    ></Column>
-  </DataTable>
+            <Button
+              icon="pi pi-trash"
+              severity="danger"
+              @click="confirmRRemoveinterview(slotProps.data.id)"
+            />
+          </div> </template
+      ></Column>
+    </DataTable>
+  </div>
   <ConfirmDialog />
 </template>
 
@@ -109,6 +145,7 @@ import {
   ProgressSpinner,
   Message,
   Badge,
+  RadioButton,
 } from 'primevue'
 import { ref, onMounted } from 'vue'
 import {
@@ -119,6 +156,7 @@ import {
   getDocs,
   deleteDoc,
   doc,
+  where,
 } from 'firebase/firestore'
 import { useUserStore } from '@/stores/user'
 import type { IInterview } from '@/interfaces'
@@ -128,15 +166,39 @@ const db = getFirestore()
 const interviews = ref<IInterview[]>([])
 const isLoading = ref<boolean>(true)
 const confirm = useConfirm()
+const selectedFilterResult = ref<string>('')
 
-const getAllInterviews = async <T extends IInterview>(): Promise<T[]> => {
-  const getData = query(
-    collection(db, `users/${userStore.userId}/interviews`),
-    orderBy('createdAt', 'desc'),
-  )
+const getAllInterviews = async <T extends IInterview>(isFilter?: boolean): Promise<T[]> => {
+  let getData
+
+  if (isFilter) {
+    getData = query(
+      collection(db, `users/${userStore.userId}/interviews`),
+      orderBy('createdAt', 'desc'),
+      where('result', '==', selectedFilterResult.value),
+    )
+  } else {
+    getData = query(
+      collection(db, `users/${userStore.userId}/interviews`),
+      orderBy('createdAt', 'desc'),
+    )
+  }
 
   const listDocs = await getDocs(getData)
   return listDocs.docs.map((doc) => doc.data() as T)
+}
+
+async function submitFilter(): Promise<void> {
+  isLoading.value = true
+  const listInterviews: Array<IInterview> = await getAllInterviews(true)
+  interviews.value = listInterviews
+  isLoading.value = false
+}
+async function clearFiler(): Promise<void> {
+  isLoading.value = true
+  const listInterviews: Array<IInterview> = await getAllInterviews()
+  interviews.value = listInterviews
+  isLoading.value = false
 }
 
 async function confirmRRemoveinterview(id: string): Promise<void> {
@@ -162,7 +224,7 @@ async function confirmRRemoveinterview(id: string): Promise<void> {
 
 onMounted(async () => {
   const listInterviews: Array<IInterview> = await getAllInterviews()
-  interviews.value = [...listInterviews]
+  interviews.value = listInterviews
   isLoading.value = false
 })
 </script>
